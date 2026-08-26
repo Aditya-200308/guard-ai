@@ -1,0 +1,17 @@
+.streamlit/config.toml
+[theme]
+base = "dark"
+primaryColor = "#ff2e63"
+backgroundColor = "#0b0207"
+secondaryBackgroundColor = "#180612"
+textColor = "#ffffff"
+font = "sans serif"
+
+[client]
+toolbarMode = "auto"
+showErrorDetails = false
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false
