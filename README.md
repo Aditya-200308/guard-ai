@@ -2,12 +2,15 @@
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Streamlit_Cloud-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://guard-ai.streamlit.app)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Google Gemini](https://img.shields.io/badge/Gemini_3.7_Flash-High_Reasoning-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
 [![CI/CD](https://img.shields.io/badge/GitHub_Actions-CI%2FCD_Pass-00F5D4?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com)
 [![Defense Accuracy](https://img.shields.io/badge/Defense_Accuracy-100%25-00F5D4?style=for-the-badge)](https://github.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+> 🌐 **Live Application (Streamlit Cloud)**: [https://guard-ai.streamlit.app](https://guard-ai.streamlit.app)
 
 **Portfolio Project #05 (FINAL PROJECT)** | An AI Security Guardrail & Automated CI/CD Evaluation Platform featuring real-time Prompt Injection Defense, PII Anonymization, Hallucination Verification, and a 25-case Red-Team Evaluation Benchmark running in GitHub Actions.
 
