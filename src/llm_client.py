@@ -1,6 +1,6 @@
 # ============================================================
 # FILE: src/llm_client.py
-# PURPOSE: High-Performance Gemini 3.7 Flash Client with Context-Aware Safety Reasoning
+# PURPOSE: High-Performance Gemini 3.8 Flash Client with Context-Aware Safety Reasoning
 # ============================================================
 
 import os
@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class LLMClient:
-    """LLM Client for GuardAI using Gemini 3.7 Flash."""
+    """LLM Client for GuardAI using Gemini 3.8 Flash."""
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = (
@@ -37,12 +37,12 @@ class LLMClient:
         max_tokens: int = 1500,
         **kwargs,
     ) -> str:
-        """Generates response via Gemini 3.7 Flash with instant safety fallback."""
+        """Generates response via Gemini 3.8 Flash with instant safety fallback."""
 
-        # 1. Attempt Live Gemini 3.7 Flash API Call
+        # 1. Attempt Live Gemini 3.8 Flash API Call
         try:
             # All Gemini API keys (AIza..., AQ..., etc.) use ?key= param auth
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key={self.api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={self.api_key}"
             headers = {"Content-Type": "application/json"}
 
             full_prompt = f"{system_prompt}\n\nUser Message:\n{user_prompt}"
@@ -237,7 +237,7 @@ class LLMClient:
         if any(w in p_lower for w in ["hi", "hello", "hey", "howdy", "good morning", "good evening", "greetings"]):
             return (
                 "**👋 Welcome to GuardAI:**\n\n"
-                "Hello! I am your AI assistant and security sentinel powered by **Google Gemini 3.7 Flash**.\n\n"
+                "Hello! I am your AI assistant and security sentinel powered by **Google Gemini 3.8 Flash**.\n\n"
                 "I can assist you with:\n"
                 "• Answering technical and general knowledge questions\n"
                 "• Generating safe code, algorithms, and explanations\n"
@@ -264,7 +264,7 @@ class LLMClient:
         if any(w in p_lower for w in ["who are you", "what are you", "what can you do", "introduce"]):
             return (
                 "**✦ GuardAI Defense Assistant:**\n\n"
-                "I am an enterprise-grade AI security perimeter and intelligent assistant powered by **Google Gemini 3.7 Flash**.\n\n"
+                "I am an enterprise-grade AI security perimeter and intelligent assistant powered by **Google Gemini 3.8 Flash**.\n\n"
                 "• **Tier 1 (Perimeter):** Neutralizes jailbreaks, adversarial prompt injections, and safety threats.\n"
                 "• **Tier 2 (Privacy):** Anonymizes PII, credit cards, and credentials before model inference.\n"
                 "• **Tier 3 (Integrity):** Enforces factual accuracy, toxicity boundaries, and safe model generation."
@@ -278,7 +278,7 @@ class LLMClient:
                 f"Your query regarding **{topic.title()}** has been verified and safely forwarded through the GuardAI perimeter.\n\n"
                 f"• **Category:** Safe Technical / Educational Inquiry\n"
                 f"• **Analysis:** Passed all heuristic boundaries with 0 threat vectors detected.\n"
-                f"• **Engine:** Google Gemini 3.7 Flash Verified Generation"
+                f"• **Engine:** Google Gemini 3.8 Flash Verified Generation"
             )
 
         # Generic Safe AI Traffic
@@ -286,5 +286,5 @@ class LLMClient:
             f"**Verified Safe AI Response:**\n\n"
             f"Your request (`{user_prompt}`) is clean and safe. It passed all perimeter injection filters and security checks.\n\n"
             f"• **Status:** Approved (0 Threat Vectors Detected)\n"
-            f"• **Engine:** Google Gemini 3.7 Flash Security Perimeter"
+            f"• **Engine:** Google Gemini 3.8 Flash Security Perimeter"
         )

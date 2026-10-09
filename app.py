@@ -489,7 +489,7 @@ st.markdown("""
     </div>
     <div style="display: flex; align-items: center; gap: 0.8rem;">
         <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 800; color: #ff758c; background: rgba(255, 46, 99, 0.12); border: 1px solid rgba(255, 117, 140, 0.4); padding: 0.4rem 0.9rem; border-radius: 6px;">
-            ⚡ GEMINI 3.7 FLASH ACTIVE
+            ⚡ GEMINI 3.8 FLASH ACTIVE
         </span>
     </div>
 </div>
@@ -700,7 +700,7 @@ with tab1:
             st.markdown(f"""
             <div style="background: rgba(0, 245, 212, 0.15); border: 1.5px solid #00f5d4; border-left: 5px solid #00f5d4; border-radius: 12px; padding: 1.2rem 1.4rem; margin-bottom: 1.2rem;">
                 <div style="font-weight: 900; color: #00f5d4; font-size: 1.1rem;">🔒 PII SANITIZED: {len(in_res.pii_redacted)} Sensitive Entities Redacted</div>
-                <div style="font-size: 0.92rem; color: #c4b0ba; margin-top: 0.3rem;">Sanitized payload safely forwarded to Gemini 3.7 Flash · Latency: <strong>{res_data['scan_lat_ms']}ms</strong></div>
+                <div style="font-size: 0.92rem; color: #c4b0ba; margin-top: 0.3rem;">Sanitized payload safely forwarded to Gemini 3.8 Flash · Latency: <strong>{res_data['scan_lat_ms']}ms</strong></div>
             </div>
             """, unsafe_allow_html=True)
         elif getattr(out_res, "hallucination_detected", False):
@@ -911,7 +911,7 @@ with tab4:
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 800; color: #ffa502; margin-bottom: 0.4rem;">TIER 3 // VERIFICATION</div>
             <div style="font-size: 1.15rem; font-weight: 900; color: #ffffff; margin-bottom: 0.6rem;">Output Integrity & Proof Guard</div>
             <div style="font-size: 0.92rem; color: #c4b0ba; line-height: 1.6;">
-                Scans generated responses from <strong>Gemini 3.7 Flash</strong> against uploaded source documents to block hallucinations and ungrounded figures.
+                Scans generated responses from <strong>Gemini 3.8 Flash</strong> against uploaded source documents to block hallucinations and ungrounded figures.
             </div>
         </div>
     </div>
