@@ -31,7 +31,7 @@
   └── 3. PII Anonymization Vault (Redacts Credit Cards, SSN, API Keys, Emails)
             │
             ▼ (Sanitized Payload)
-[🧠 TIER 2: Foundation Model (Google Gemini 3.8 Flash)]
+[🧠 TIER 2: Foundation Model (Google Gemini 4 Argon Primary | 3.8 Flash Backup)]
   └── Generates Structured Safe Response
             │
             ▼ (Model Output)
