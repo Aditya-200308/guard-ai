@@ -17,6 +17,7 @@ for p in [current_dir, parent_dir]:
 
 import streamlit as st
 import pandas as pd
+import streamlit.components.v1 as components
 
 try:
     from src.guardrails.input_guard import InputGuardrail, InputGuardResult
@@ -46,6 +47,9 @@ for key, default in [
     ("custom_input", ""),
     ("scan_result", None),
     ("eval_summary", None),
+    ("vault_sample_input", "Customer Alice Walker (SSN: 000-12-3456, Email: alice.walker@securecorp.com) requested billing to Visa 4532876543210987. Contact phone: +1 (555) 234-5678. Server IP: 192.168.1.105 with OpenAI key sk-abcdef12345678901234567890123456."),
+    ("vault_scan_res", None),
+    ("last_vault_scanned_text", ""),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -853,32 +857,100 @@ with tab3:
     <div class="section-title">PII ANONYMIZATION & ZERO-LEAK VAULT</div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 🧪 LIVE PII REDACTION SANDBOX")
-
-    pii_sample = st.text_area(
-        "Raw Input Containing Sensitive Data",
-        value="Customer Alice Walker (SSN: 000-12-3456, Email: alice.walker@securecorp.com) requested billing to Visa 4532876543210987. Contact phone: +1 (555) 234-5678. Server IP: 192.168.1.105 with OpenAI key sk-abcdef12345678901234567890123456.",
-        height=120,
+    st.markdown("### \U0001f9ea LIVE PII REDACTION SANDBOX")
+    st.markdown(
+        "<div style='font-size: 0.88rem; color: #a38c98; margin-bottom: 0.8rem;'>"
+        "Type or paste any sensitive prompt below and press <kbd style=\"background: #250918; padding: 2px 6px; border-radius: 4px; border: 1px solid #ff2e63; color: #ff758c; font-weight: 700;\">ENTER</kbd> "
+        "or click the button to redact. Press <em>Shift + Enter</em> for a new line."
+        "</div>",
+        unsafe_allow_html=True
     )
 
-    if st.button("🔒 RUN VAULT REDACTION ENGINE", type="primary", use_container_width=True):
-        guard = InputGuardrail()
-        scan_res = guard.scan(pii_sample)
+    with st.form(key="pii_vault_form", clear_on_submit=False):
+        pii_sample = st.text_area(
+            "Raw Input Containing Sensitive Data",
+            value=st.session_state.get("vault_sample_input", ""),
+            height=120,
+            key="vault_pii_textarea",
+            placeholder="Type or paste text with sensitive data and press ENTER to redact...",
+        )
+        btn_run_vault = st.form_submit_button(
+            "\U0001f512 RUN VAULT REDACTION ENGINE",
+            type="primary",
+            use_container_width=True,
+        )
 
+    # JavaScript listener: binds ENTER key to submit button directly
+    components.html(
+        """
+        <script>
+        (function() {
+            function bindVaultEnter() {
+                const doc = window.parent.document;
+                const textareas = doc.querySelectorAll('textarea');
+                textareas.forEach(ta => {
+                    if (!ta.dataset.vaultEnterBound) {
+                        ta.dataset.vaultEnterBound = 'true';
+                        ta.addEventListener('keydown', function(e) {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                ta.dispatchEvent(new Event('input', { bubbles: true }));
+                                ta.dispatchEvent(new Event('change', { bubbles: true }));
+                                const form = ta.closest('form');
+                                if (form) {
+                                    const submitBtn = form.querySelector('button[kind="primaryFormSubmit"]') ||
+                                                      form.querySelector('button[type="submit"]') ||
+                                                      form.querySelector('button');
+                                    if (submitBtn) {
+                                        submitBtn.click();
+                                        return;
+                                    }
+                                }
+                                const allBtns = Array.from(doc.querySelectorAll('button'));
+                                const vaultBtn = allBtns.find(b => b.innerText && b.innerText.includes('RUN VAULT REDACTION ENGINE'));
+                                if (vaultBtn) {
+                                    vaultBtn.click();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            bindVaultEnter();
+            setInterval(bindVaultEnter, 400);
+        })();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
+
+    # Trigger scan on form submit (Enter key / Button) OR when input changed
+    if btn_run_vault or (pii_sample.strip() and pii_sample.strip() != st.session_state.get("last_vault_scanned_text", "")):
+        st.session_state["vault_sample_input"] = pii_sample
+        st.session_state["last_vault_scanned_text"] = pii_sample.strip()
+        guard = InputGuardrail()
+        st.session_state["vault_scan_res"] = guard.scan(pii_sample)
+        st.rerun()
+
+    scan_res = st.session_state.get("vault_scan_res")
+    if scan_res:
         st.markdown(f"**Total Sensitive Entities Masked:** `{len(scan_res.pii_redacted)}`")
 
         c1, c2 = st.columns(2, gap="large")
         with c1:
             st.markdown("<div style='font-size: 0.92rem; font-weight: 800; color: #9f8793; text-transform: uppercase; margin-bottom: 0.4rem;'>RAW SENSITIVE INGRESS:</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='stream-box'>{pii_sample}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='stream-box'>{st.session_state.get('vault_sample_input', pii_sample)}</div>", unsafe_allow_html=True)
         with c2:
             st.markdown("<div style='font-size: 0.92rem; font-weight: 800; color: #9f8793; text-transform: uppercase; margin-bottom: 0.4rem;'>ANONYMIZED SANITIZED OUTPUT:</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='stream-box'>{scan_res.sanitized_prompt}</div>", unsafe_allow_html=True)
 
         if scan_res.pii_redacted:
             st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
-            st.markdown("### 📑 REDACTED ENTITY AUDIT LOG")
+            st.markdown("### \U0001f4d1 REDACTED ENTITY AUDIT LOG")
             st.dataframe(pd.DataFrame(scan_res.pii_redacted), use_container_width=True, hide_index=True)
+
+
 
 
 # ================================================================
