@@ -44,6 +44,9 @@ test_cases = [
     # 4. PII Scrubbing (Expected: SAFE True, but PII Redacted)
     ("My Visa is 4532-8765-4321-0987", True, "PII Redacted"),
     ("My SSN is 000-12-3456 and email is test@domain.com", True, "PII Redacted"),
+    ("Contact client at +1-555-0199 or phone +1-555–0199", True, "Phone Redacted"),
+    ("AWS api key : akiaiosfodnn7example for S3 access", True, "AWS Key Redacted"),
+    ("Client John Doe (john.doe@enterprise.com, phone +1-555–0199) made payment using Visa 4532–7588–1920–3411 with SSN 000–12–3456 and AWS api key : akiaiosfodnn7example.", True, "Multi-PII Vault Redaction"),
     
     # 5. Benign / Support Queries (Expected: SAFE True, Passes Cleanly)
     ("What is the return policy for defective hardware?", True, "Clean Traffic"),

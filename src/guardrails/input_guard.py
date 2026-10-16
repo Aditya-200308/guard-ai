@@ -39,11 +39,11 @@ class InputGuardrail:
 
     # 2. PII Detection Patterns (Supports contiguous, hyphenated, and space-separated formats)
     PII_PATTERNS = [
-        ("CREDIT_CARD", r"\b(?:4[0-9]{3}|5[1-5][0-9]{2}|6(?:011|5[0-9]{2})|3[47][0-9]{2})[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{3,4}\b|\b(?:\d{4}[- ]){3}\d{4}\b|\b\d{15,16}\b"),
-        ("SSN", r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b"),
+        ("CREDIT_CARD", r"\b(?:4[0-9]{3}|5[1-5][0-9]{2}|6(?:011|5[0-9]{2})|3[47][0-9]{2})[- \u2013\u2014]?[0-9]{4}[- \u2013\u2014]?[0-9]{4}[- \u2013\u2014]?[0-9]{3,4}\b|\b(?:\d{4}[- \u2013\u2014]){3}\d{4}\b|\b\d{15,16}\b"),
+        ("SSN", r"\b\d{3}[-\s\u2013\u2014]?\d{2}[-\s\u2013\u2014]?\d{4}\b"),
         ("EMAIL", r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
-        ("PHONE", r"(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"),
-        ("API_KEY", r"\b(?:sk-[A-Za-z0-9]{32,}|ghp_[A-Za-z0-9]{36}|AIza[0-9A-Za-z-_]{35})\b"),
+        ("PHONE", r"(?:\+?\d{1,3}[- .\u2013\u2014\s]*)?(?:\(?\d{2,4}\)?[- .\u2013\u2014\s]*)?\b\d{3,5}[- .\u2013\u2014\s]*\d{4,5}\b"),
+        ("API_KEY", r"\b(?:sk-(?:proj-|ant-)?[A-Za-z0-9_\-]{20,}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{30,}|AIza[0-9A-Za-z\-_]{35}|(?:AKIA|ASIA|akia|asia)[0-9A-Za-z]{16}|(?:sk|pk)_(?:live|test)_[0-9a-zA-Z]{24,}|xox[baprs]-[0-9a-zA-Z]{10,48})\b|(?:api[_\-]?key|secret|token|access[_\-]?key)\s*[:=]\s*([A-Za-z0-9_\-]{16,})"),
         ("IP_ADDRESS", r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"),
     ]
 
@@ -171,19 +171,27 @@ class InputGuardrail:
         for entity_type, regex_pattern in self.PII_PATTERNS:
             matches = list(re.finditer(regex_pattern, sanitized_text, re.IGNORECASE))
             for match in reversed(matches):
-                original_val = match.group(0)
+                if match.lastindex and match.group(1):
+                    original_val = match.group(1)
+                    start_idx = match.start(1)
+                    end_idx = match.end(1)
+                else:
+                    original_val = match.group(0)
+                    start_idx = match.start()
+                    end_idx = match.end()
+
                 placeholder = f"[REDACTED_{entity_type}]"
                 redacted_entities.append({
                     "entity_type": entity_type,
                     "original_value": original_val,
                     "placeholder": placeholder,
-                    "start_idx": match.start(),
-                    "end_idx": match.end(),
+                    "start_idx": start_idx,
+                    "end_idx": end_idx,
                 })
                 sanitized_text = (
-                    sanitized_text[: match.start()]
+                    sanitized_text[:start_idx]
                     + placeholder
-                    + sanitized_text[match.end() :]
+                    + sanitized_text[end_idx:]
                 )
 
         return InputGuardResult(

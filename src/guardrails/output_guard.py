@@ -30,6 +30,7 @@ class OutputGuardrail:
         (r"\bAIza[0-9A-Za-z-_]{35}\b", "Google API Key Leak"),
         (r"\bsk-[A-Za-z0-9]{32,}\b", "OpenAI API Key Leak"),
         (r"\b(ghp_[A-Za-z0-9]{36})\b", "GitHub Token Leak"),
+        (r"\b(?:AKIA|ASIA|akia|asia)[0-9A-Za-z]{16}\b", "AWS Access Key Leak"),
     ]
 
     # 2. Known High-Risk Fabricated Patterns

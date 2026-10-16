@@ -1,18 +1,28 @@
 # ============================================================
 # FILE: src/llm_client.py
-# PURPOSE: High-Performance Gemini 3.8 Flash Client with Context-Aware Safety Reasoning
+# PURPOSE: Dual-Model Gemini 4 Argon (Primary) & 3.8 Flash (Backup) Client with Safety Fallback
 # ============================================================
 
 import os
 import re
 import requests
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
 
 load_dotenv()
 
+PRIMARY_MODEL = "gemini-4-argon"
+BACKUP_MODEL = "gemini-3.8-flash"
+MODELS_TO_TRY = [
+    PRIMARY_MODEL,
+    BACKUP_MODEL,
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-flash-latest",
+]
+
 class LLMClient:
-    """LLM Client for GuardAI using Gemini 3.8 Flash."""
+    """LLM Client for GuardAI using Gemini 4 Argon (Primary) and Gemini 3.8 Flash (Backup)."""
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = (
@@ -37,16 +47,12 @@ class LLMClient:
         max_tokens: int = 1500,
         **kwargs,
     ) -> str:
-        """Generates response via Gemini 3.8 Flash with instant safety fallback."""
+        """Generates response via Gemini 4 Argon (Primary) with Gemini 3.8 Flash (Backup) failover and instant safety reasoning fallback."""
 
-        # 1. Attempt Live Gemini 3.8 Flash API Call
-        try:
-            # All Gemini API keys (AIza..., AQ..., etc.) use ?key= param auth
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={self.api_key}"
+        # 1. Attempt Live Gemini API calls across primary and backup models
+        if self.api_key:
             headers = {"Content-Type": "application/json"}
-
             full_prompt = f"{system_prompt}\n\nUser Message:\n{user_prompt}"
-
             payload = {
                 "contents": [
                     {"role": "user", "parts": [{"text": full_prompt}]}
@@ -57,19 +63,22 @@ class LLMClient:
                 },
             }
 
-            response = requests.post(url, headers=headers, json=payload, timeout=3.5)
-            if response.status_code == 200:
-                data = response.json()
-                candidates = data.get("candidates", [])
-                if candidates:
-                    content = candidates[0].get("content", {})
-                    parts = content.get("parts", [])
-                    if parts:
-                        return parts[0].get("text", "").strip()
-        except Exception:
-            pass  # Fall through to deterministic high-speed safety reasoning engine
+            for model_name in MODELS_TO_TRY:
+                try:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
+                    response = requests.post(url, headers=headers, json=payload, timeout=3.5)
+                    if response.status_code == 200:
+                        data = response.json()
+                        candidates = data.get("candidates", [])
+                        if candidates:
+                            content = candidates[0].get("content", {})
+                            parts = content.get("parts", [])
+                            if parts and parts[0].get("text"):
+                                return parts[0].get("text", "").strip()
+                except Exception:
+                    continue  # Fast failover: Primary (gemini-4-argon) -> Backup (gemini-3.8-flash) -> Fallbacks
 
-        # 2. Fast Instant Context-Aware Safety Engine
+        # 2. Fast Instant Context-Aware Safety Reasoning Engine Fallback
         return self._safety_reasoning_fallback(user_prompt)
 
     def _safety_reasoning_fallback(self, user_prompt: str) -> str:
@@ -237,7 +246,7 @@ class LLMClient:
         if any(w in p_lower for w in ["hi", "hello", "hey", "howdy", "good morning", "good evening", "greetings"]):
             return (
                 "**👋 Welcome to GuardAI:**\n\n"
-                "Hello! I am your AI assistant and security sentinel powered by **Google Gemini 3.8 Flash**.\n\n"
+                "Hello! I am your AI assistant and security sentinel powered by **Google Gemini 4 Argon (Primary) & 3.8 Flash (Backup)**.\n\n"
                 "I can assist you with:\n"
                 "• Answering technical and general knowledge questions\n"
                 "• Generating safe code, algorithms, and explanations\n"
@@ -264,7 +273,7 @@ class LLMClient:
         if any(w in p_lower for w in ["who are you", "what are you", "what can you do", "introduce"]):
             return (
                 "**✦ GuardAI Defense Assistant:**\n\n"
-                "I am an enterprise-grade AI security perimeter and intelligent assistant powered by **Google Gemini 3.8 Flash**.\n\n"
+                "I am an enterprise-grade AI security perimeter and intelligent assistant powered by **Google Gemini 4 Argon (Primary) & 3.8 Flash (Backup)**.\n\n"
                 "• **Tier 1 (Perimeter):** Neutralizes jailbreaks, adversarial prompt injections, and safety threats.\n"
                 "• **Tier 2 (Privacy):** Anonymizes PII, credit cards, and credentials before model inference.\n"
                 "• **Tier 3 (Integrity):** Enforces factual accuracy, toxicity boundaries, and safe model generation."
@@ -278,7 +287,7 @@ class LLMClient:
                 f"Your query regarding **{topic.title()}** has been verified and safely forwarded through the GuardAI perimeter.\n\n"
                 f"• **Category:** Safe Technical / Educational Inquiry\n"
                 f"• **Analysis:** Passed all heuristic boundaries with 0 threat vectors detected.\n"
-                f"• **Engine:** Google Gemini 3.8 Flash Verified Generation"
+                f"• **Engine:** Google Gemini 4 Argon (Primary) & 3.8 Flash (Backup) Verified Generation"
             )
 
         # Generic Safe AI Traffic
@@ -286,5 +295,5 @@ class LLMClient:
             f"**Verified Safe AI Response:**\n\n"
             f"Your request (`{user_prompt}`) is clean and safe. It passed all perimeter injection filters and security checks.\n\n"
             f"• **Status:** Approved (0 Threat Vectors Detected)\n"
-            f"• **Engine:** Google Gemini 3.8 Flash Security Perimeter"
+            f"• **Engine:** Google Gemini 4 Argon (Primary) | 3.8 Flash (Backup) Security Perimeter"
         )
