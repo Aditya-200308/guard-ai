@@ -858,14 +858,6 @@ with tab3:
     """, unsafe_allow_html=True)
 
     st.markdown("### \U0001f9ea LIVE PII REDACTION SANDBOX")
-    st.markdown(
-        "<div style='font-size: 0.88rem; color: #a38c98; margin-bottom: 0.8rem;'>"
-        "Type or paste any sensitive prompt below and press <kbd style=\"background: #250918; padding: 2px 6px; border-radius: 4px; border: 1px solid #ff2e63; color: #ff758c; font-weight: 700;\">ENTER</kbd> "
-        "or click the button to redact. Press <em>Shift + Enter</em> for a new line."
-        "</div>",
-        unsafe_allow_html=True
-    )
-
     with st.form(key="pii_vault_form", clear_on_submit=False):
         pii_sample = st.text_area(
             "Raw Input Containing Sensitive Data",
