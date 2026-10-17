@@ -16,8 +16,6 @@ BACKUP_MODEL = "gemini-3.8-flash"
 MODELS_TO_TRY = [
     PRIMARY_MODEL,
     BACKUP_MODEL,
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
     "gemini-flash-latest",
 ]
 
